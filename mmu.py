@@ -8,33 +8,23 @@
 *
 '''
 class MMU:
-
-    def __init__(self):
-        self.totalReads = 0
-        self.totalWrites = 0
-        self.totalFaults = 0
-        self.debug = 0
-
     def read_memory(self, page_number):
-        self.totalReads += 1
+        pass
 
     def write_memory(self, page_number):
-        self.totalWrites += 1
-
-    def page_fault(self):
-        self.totalFaults += 1
+        pass
 
     def set_debug(self):
-        self.debug = 1
+        pass
 
     def reset_debug(self):
-        self.debug = 0
+        pass
 
     def get_total_disk_reads(self):
-        return self.totalReads
+        return -1
 
     def get_total_disk_writes(self):
-        return self.totalWrites
+        return -1
 
     def get_total_page_faults(self):
-        return self.totalFaults
+        return -1
