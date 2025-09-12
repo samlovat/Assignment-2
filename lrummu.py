@@ -25,6 +25,7 @@ class LruMMU(MMU):
                         self.cache.append(page)
                     return True
                 dirty = 1
+                page[0] = 1
                 if counter != 1:
                         # Move to top of cache
                         self.cache.remove(page)
