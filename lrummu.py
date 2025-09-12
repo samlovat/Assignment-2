@@ -13,6 +13,8 @@ class LruMMU(MMU):
 
     def check_load(self, searched_page_number, action):
         # Function which checks if requested page is already loaded
+        if action == "w":
+            self.totalWrites += 1  
         counter = 0
         for page in self.cache[:]:
             dirty, page_num = page
@@ -32,12 +34,13 @@ class LruMMU(MMU):
                 return True
         if self.debug == 1:
             print("Page Fault! ")
-        self.totalFaults += 1
+        # self.totalFaults += 1
         self.totalReads += 1
         return False
     
     def insert_page(self, page_number, action):
         # Set inserted page's dirty bit according to action called
+        self.totalFaults += 1
         newDirty = 1
         if action == "r":
             newDirty = 0
