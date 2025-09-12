@@ -1,34 +1,106 @@
 from mmu import MMU
+import random
 
 class RandMMU(MMU):
     def __init__(self, frames):
-        # TODO: Constructor logic for RandMMU
-        pass
+        # TODO: Constructor logic for LruMMU
+        # Use a cache (queue)
+        # print("I am alive!\n")
+        self.cache = []
+        self.pageFrames = frames
+        self.totalReads = 0
+        self.totalWrites = 0
+        self.totalFaults = 0
+        self.debug = 0
 
-    def set_debug(self):
-        # TODO: Implement the method to set debug mode
-        pass
-
-    def reset_debug(self):
-        # TODO: Implement the method to reset debug mode
-        pass
+    def check_load(self, searched_page_number, action):
+        # Function which checks if requested page is already loaded
+        counter = 0
+        for page in self.cache[:]:
+            dirty, page_num = page
+            counter += 1
+            if page_num == searched_page_number:
+                if action == "r":
+                    # if counter != 1:
+                    #     # Move to top of cache
+                    #     self.cache.remove(page)
+                    #     self.cache.append(page)
+                    return True
+                dirty = 1
+                # if counter != 1:
+                #         # Move to top of cache
+                #         self.cache.remove(page)
+                #         self.cache.append(page)
+                return True
+        if self.debug == 1:
+            print("Page Fault! ")
+        self.totalFaults += 1
+        self.totalReads += 1
+        return False
+    
+    def insert_page(self, page_number, action):
+        # Set inserted page's dirty bit according to action called
+        newDirty = 1
+        if action == "r":
+            newDirty = 0
+        if len(self.cache) == self.pageFrames:
+            # Need to replace random page
+            # Grab page from cache to check dirty bit
+            randomIndex = random.randint(0, len(self.cache) - 1)
+            topDirty, randomPage = self.cache[randomIndex]
+            if self.debug == 1:
+                print("Victim: ", topDirty, randomPage)
+            if topDirty == 1:
+                # If victim has dirty bit flipped, write to disk before popping from cache
+                self.totalWrites += 1
+                if self.debug == 1:
+                    print("Had to write to disk!")
+            self.cache.pop(randomIndex) 
+            self.cache.append((newDirty, page_number))
+        else:
+            # Else just push to top of cache
+            self.cache.append((newDirty, page_number))
+        if self.debug == 1:
+            print("Push_front: ", newDirty, page_number)
 
     def read_memory(self, page_number):
-        # TODO: Implement the method to read memory
-        pass
+        if self.debug == 1:
+            print("\nRequested Action: Read ", page_number)
+            self.print_cache()
+        if self.check_load(page_number, "r") == False:
+            self.insert_page(page_number, "r")
+        else:
+            if self.debug == 1:
+                print("Page Hit! ", page_number)
+        
 
     def write_memory(self, page_number):
-        # TODO: Implement the method to write memory
-        pass
+        if self.debug == 1:
+            print("\nRequested Action: Write ", page_number)
+            self.print_cache()
+        if self.check_load(page_number, "w") == False:
+            self.insert_page(page_number, "w")
+        else:
+            if self.debug == 1:
+                print("Page Hit! ", page_number)
+
+    def set_debug(self):
+        self.debug = 1
+
+    def reset_debug(self):
+        self.debug = 0
+
+    def print_cache(self):
+        print("Current cache:")
+        for dirty, page in self.cache:
+            print(dirty, " , ", page)
+        print("\n")
 
     def get_total_disk_reads(self):
-        # TODO: Implement the method to get total disk reads
-        return -1
+        return self.totalReads
 
     def get_total_disk_writes(self):
-        # TODO: Implement the method to get total disk writes
-        return -1
+        return self.totalWrites
 
     def get_total_page_faults(self):
-        # TODO: Implement the method to get total page faults
-        return -1
+        return self.totalFaults
