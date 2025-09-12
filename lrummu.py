@@ -12,12 +12,12 @@ class LruMMU(MMU):
         self.debug = 0
 
     def check_load(self, searched_page_number, action):
-        # Function which checks if requested page is already loaded
-        if action == "w":
-            self.totalWrites += 1  
+        # Function which checks if requested page is already loaded 
         counter = 0
         for page in self.cache[:]:
             dirty, page_num = page
+            if action == "w" and dirty == 1:
+                self.totalWrites += 1 
             counter += 1
             if page_num == searched_page_number:
                 if action == "r":
@@ -52,7 +52,7 @@ class LruMMU(MMU):
                 print("Victim: ", topDirty, topPage)
             if topDirty == 1:
                 # If victim has dirty bit flipped, write to disk before popping from cache
-                self.totalWrites += 1
+                # self.totalWrites += 1
                 if self.debug == 1:
                     print("Had to write to disk!")
             self.cache.pop(0) 
