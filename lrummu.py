@@ -3,8 +3,8 @@ from mmu import MMU
 class LruMMU(MMU):
     def __init__(self, frames):
         # TODO: Constructor logic for LruMMU
-        # Use a stack
-        self.stack = []
+        # Use a cache (queue)
+        self.cache = []
         self.pageFrames = frames
         self.totalReads = 0
         self.totalWrites = 0
@@ -14,21 +14,21 @@ class LruMMU(MMU):
     def check_load(self, searched_page_number, action):
         # Function which checks if requested page is already loaded
         counter = 0
-        for page in self.stack[:]:
+        for page in self.cache[:]:
             dirty, page_num = page
             counter += 1
             if page_num == searched_page_number:
                 if action == "r":
                     if counter != 1:
-                        # Move to top of stack
-                        self.stack.remove(page)
-                        self.stack.append(page)
+                        # Move to top of cache
+                        self.cache.remove(page)
+                        self.cache.append(page)
                     return True
                 dirty = 1
                 if counter != 1:
-                        # Move to top of stack
-                        self.stack.remove(page)
-                        self.stack.append(page)
+                        # Move to top of cache
+                        self.cache.remove(page)
+                        self.cache.append(page)
                 return True
         if self.debug == 1:
             print("Page Fault! ")
@@ -41,29 +41,29 @@ class LruMMU(MMU):
         newDirty = 1
         if action == "r":
             newDirty = 0
-        if len(self.stack) == self.pageFrames:
+        if len(self.cache) == self.pageFrames:
             # Need to replace top page
-            # Grab top of stack to check dirty bit
-            topDirty, topPage = self.stack[0]
+            # Grab top of cache to check dirty bit
+            topDirty, topPage = self.cache[0]
             if self.debug == 1:
                 print("Victim: ", topDirty, topPage)
             if topDirty == 1:
-                # If victim has dirty bit flipped, write to disk before popping from stack
+                # If victim has dirty bit flipped, write to disk before popping from cache
                 self.totalWrites += 1
                 if self.debug == 1:
                     print("Had to write to disk!")
-            self.stack.pop(0) 
-            self.stack.append((newDirty, page_number))
+            self.cache.pop(0) 
+            self.cache.append((newDirty, page_number))
         else:
-            # Else just push to top of stack
-            self.stack.append((newDirty, page_number))
+            # Else just push to top of cache
+            self.cache.append((newDirty, page_number))
         if self.debug == 1:
             print("Push_front: ", newDirty, page_number)
 
     def read_memory(self, page_number):
         if self.debug == 1:
             print("\nRequested Action: Read ", page_number)
-            self.print_stack()
+            self.print_cache()
         if self.check_load(page_number, "r") == False:
             self.insert_page(page_number, "r")
         else:
@@ -74,7 +74,7 @@ class LruMMU(MMU):
     def write_memory(self, page_number):
         if self.debug == 1:
             print("\nRequested Action: Write ", page_number)
-            self.print_stack()
+            self.print_cache()
         if self.check_load(page_number, "w") == False:
             self.insert_page(page_number, "w")
         else:
@@ -87,9 +87,9 @@ class LruMMU(MMU):
     def reset_debug(self):
         self.debug = 0
 
-    def print_stack(self):
-        print("Current stack:")
-        for dirty, page in self.stack:
+    def print_cache(self):
+        print("Current cache:")
+        for dirty, page in self.cache:
             print(dirty, " , ", page)
         print("\n")
 
