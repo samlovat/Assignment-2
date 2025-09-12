@@ -6,9 +6,9 @@ class LruMMU(MMU):
         # Use a cache (queue)
         self.cache = []
         self.pageFrames = frames
-        self.totalReads = 0
-        self.totalWrites = 0
-        self.totalFaults = 0
+        self.totalReads = -1
+        self.totalWrites = -1
+        self.totalFaults = -1
         self.debug = 0
 
     def check_load(self, searched_page_number, action):
