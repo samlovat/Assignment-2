@@ -2,7 +2,6 @@ from mmu import MMU
 
 class LruMMU(MMU):
     def __init__(self, frames):
-        # TODO: Constructor logic for LruMMU
         # Use a cache (queue)
         self.cache = []
         self.page_frames = frames
@@ -13,13 +12,14 @@ class LruMMU(MMU):
 
     def check_loaded(self, searched_page_number, action):
         # Function which checks if requested page is already loaded 
-        for i, (dirty, page_num) in enumerate(self.cache):
+        for page in self.cache:
+            dirty, page_num = page
             if page_num == searched_page_number:
                 # If writing, mark dirty
                 if action == "w":
-                    dirty = 1
+                    dirty = True
                 # Move this entry to the end (most recently used)
-                self.cache.pop(i)
+                self.cache.remove(page)
                 self.cache.append((dirty, page_num))
                 return True
                     
