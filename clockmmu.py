@@ -19,7 +19,7 @@ class ClockMMU(MMU):
             if page_num == searched_page_number:
                 # If writing, mark dirty
                 if action == "w":
-                    self.cache[i] = (True, False, page_num)
+                    self.cache[i] = (True, used, page_num)
                 return True
             
         print("Page Fault! ") if self.debug == 1 else None
@@ -37,7 +37,7 @@ class ClockMMU(MMU):
             while not clocked:
                 is_dirty, used, page_num = self.cache[self.hand]
                 if used:
-                    self.cache[self.hand] = (is_dirty, False, page_number)
+                    self.cache[self.hand] = (is_dirty, False, page_num)
                 else:
                     print("Victim: ", is_dirty, page_num) if self.debug == 1 else None
                     if is_dirty == 1:
