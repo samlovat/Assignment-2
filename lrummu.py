@@ -45,9 +45,9 @@ class LruMMU(MMU):
             if top_dirty == 1:
                 # If victim has dirty bit flipped, write to disk before popping from cache
                 print("Had to write to disk!") if self.debug == 1 else None
-                
-                self.cache.pop(0) 
-                self.cache.append((new_dirty, page_number))
+
+            self.cache.pop(0) 
+            self.cache.append((new_dirty, page_number))
         else:
             # Else just push to top of cache
             self.cache.append((new_dirty, page_number))
