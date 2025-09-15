@@ -13,30 +13,25 @@ class LruMMU(MMU):
 
     def check_loaded(self, searched_page_number, action):
         # Function which checks if requested page is already loaded 
-
-        counter = 0
-        for page in self.cache:
-            dirty, page_num = page
-            counter += 1
+        for i, (dirty, page_num) in enumerate(self.cache):
             if page_num == searched_page_number:
-
-                
-                dirty = 1 if action == "w" else None
-
-                if counter != 1:
-                    # Move to top of cache
-                    self.cache.remove(page)
-                    self.cache.append(page)
-                    return True
-        
+                # If writing, mark dirty
+                if action == "w":
+                    dirty = 1
+                # Move this entry to the end (most recently used)
+                self.cache.pop(i)
+                self.cache.append((dirty, page_num))
+                return True
+                    
         print("Page Fault! ") if self.debug == 1 else None
+        self.total_faults += 1
         return False
     
     def insert_page(self, page_number, action):
         # Set inserted page's dirty bit according to action called
-        self.total_faults += 1
-        new_dirty = not action == "r"
+        new_dirty = action == "w"
 
+        self.total_reads += 1
         # if cache is full
         if len(self.cache) == self.page_frames:
             # get first entry in the cache and check if its dirty
@@ -46,6 +41,8 @@ class LruMMU(MMU):
                 # If victim has dirty bit flipped, write to disk before popping from cache
                 print("Had to write to disk!") if self.debug == 1 else None
 
+                self.total_writes += 1
+                
             self.cache.pop(0) 
             self.cache.append((new_dirty, page_number))
         else:
@@ -55,7 +52,6 @@ class LruMMU(MMU):
         print("Push_front: ", new_dirty, page_number) if self.debug == 1 else None
 
     def read_memory(self, page_number):
-        self.total_reads += 1
         if self.debug == 1:
             print("\nRequested Action: Read ", page_number)
             self.print_cache()
@@ -65,9 +61,7 @@ class LruMMU(MMU):
             if self.debug == 1:
                 print("Page Hit! ", page_number)
         
-
     def write_memory(self, page_number):
-        self.total_writes += 1
         if self.debug == 1:
             print("\nRequested Action: Write ", page_number)
             self.print_cache()
