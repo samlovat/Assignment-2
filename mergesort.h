@@ -7,7 +7,8 @@
 void my_mergesort(int left, int right);
 void merge(int leftstart, int leftend, int rightstart, int rightend);
 
-/* each instance of this struct stores the argument to the parallel_mergesort()
+/* 
+ *each instance of this struct stores the argument to the parallel_mergesort()
  * function. */
 struct argument {
   int left;
@@ -15,7 +16,8 @@ struct argument {
   int level;
 };
 
-/* it's not like we want arg to be a void type pointer,
+/* 
+ * it's not like we want arg to be a void type pointer,
  * it's just that pthread_create() assumes the thread
  * function takes a void type pointer as its parameter. */
 void* parallel_mergesort(void* arg);
