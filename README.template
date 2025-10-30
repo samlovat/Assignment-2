@@ -1,57 +1,81 @@
-README.template
-
 ## Project Number/Title 
 
-* Authors: Your Name, and your group members’ names
-* Group name: Your Group Name
+* Authors: Sam Lovat a1813474 and Luke Falkstrom a1885869
+* Group name: Luke & Sam
 
 ## Overview
 
-Concisely explain what the program does. If this exceeds a couple of
-sentences, you're going too far. Generally, you should be pulling this
-right from the project specification. We don't want you to just cut and
-paste, but paraphrase what is stated in the project specification.
+This program performs a parallel mergesort on an array of random integers using pthreads. It accepts 
+three parameters: input size, cutoff level (maximum recursion depth at which new threads are spawned), 
+and the random seed for the array.
 
 ## Manifest
 
-A listing of source files and other non-generated files, and a brief
-(one-line) explanation of the purpose of each file.
+- mergesort.c: Parallel mergesort implementation (merge, my_mergesort, parallel_mergesort, buildArgs)
+- mergesort.h: Declarations and globals (A, B, cutoff) and struct argument
+- test-mergesort.c: Test driver (CLI parsing, data generation, timing, correctness check)
+- Makefile: Build rules for objects, dependencies, and executable
 
 ## Building the project
 
-This section should tell the user how to build your code.  If you are
-delivering a library, where does it need to be installed, or how do you use
-it? Is this an executable, if so, how can a user get up to speed as fast as
-possible?
+Prerequisites:
+- gcc and make
+- pthreads (on Linux/WSL this is provided by default; link flag is handled by the Makefile)
+
+Build (WSL/Linux/macOS):
+make
+
+Rebuild from scratch:
+make clean && make
+
+Result:
+- Executable: test-mergesort
+
+Windows notes:
+- If building outside WSL, use an environment that provides gcc and make (e.g., MSYS2/MinGW).
+- The output may be test-mergesort.exe and can be run as:
+.\test-mergesort.exe <input size> <cutoff level> <seed>
 
 ## Features and usage
 
-Summarise the main features of your program. It is also appropriate to
-instruct the user how to use your program.
+Features:
+- Parallel mergesort using pthreads with a configurable cutoff (threading depth)
+- Deterministic input generation via RNG seed
+- Timing output for the full sort
+- Post-sort correctness check (verifies array is nondecreasing)
+
+Usage:
+./test-mergesort <input size> <cutoff level> <seed>
+
+Arguments:
+- input size: Number of array elements to be sorted (e.g., 1000000)
+- cutoff level: Maximum recursion depth that spawns new threads (0 = single-threaded)
+- seed: Random seed used for array generation
+
+Examples:
+./test-mergesort 1000000 0 1234    # single-threaded baseline
+./test-mergesort 1000000 2 1234    # spawn threads up to depth 2
+./test-mergesort 1000000 4 42      # deeper parallelism with a different seed
+
+Output:
+- On success: prints elapsed time in seconds, e.g., "Sorting N elements took X.XX seconds."
+- On failure: prints an error and exits if the array is not sorted
 
 ## Testing
 
-This section should detail how you tested your code. Simply stating "I ran
-it a few times and it seems to work" is not sufficient. Your testing needs
-to be detailed here.
-
-## Known Bugs
-
-List known bugs that you weren't able to fix (or ran out of time to fix).
+To test my program, we primarily ran the provided test-mergesort executable multiple times with 
+different cutoff values to ensure the program completed without crashing. We focused on fixing runtime 
+errors such as segmentation faults and double-free issues during execution. Once these issues were 
+all resolved, we submitted the files to the gradescope page, which further tested the implementation, 
+and with the first submission everything came back successful.
 
 ## Reflection and Self Assessment
 
-Discuss the issues you encountered during development and testing. What
-problems did you have? What did you have to research and learn on your own?
-What kinds of errors did you get? How did you fix them?
+During testing and development we ran into a few segmentation fault errors which stemmed from 
+incorrectly implementing memcpy and attempting to free the args ourselves before realising that 
+the test-mergesort.c handled this. When attempting to test the program using make, we received a 
+console error which after deliberation with other teams was fixed by running make again. 
 
-What parts of the project did you find challenging? Is there anything that
-finally "clicked" for you in the process of working on this project? How well
-did the development and testing process go for you?
-
-## Sources Used
-
-If you used any sources outside of the textbook, you should list them here. 
-If you looked something up on stackoverflow.com or you use help from AI, and 
-fail to cite it in this section, it will be considered plagiarism and dealt 
-with accordingly. So be safe CITE!
+We expected more issues/errors to arise due to multiprogramming with pthreads, however we ran into 
+little trouble. Completing the program definitely helped to contextualise the functionality of 
+threading and how they speed up a program such as this one. 
